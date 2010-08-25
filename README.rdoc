@@ -4,7 +4,7 @@ http://farm5.static.flickr.com/4136/4925714505_3a3a0a6134_o.jpg
 
 <b>I can image a Dropbox session, just for testing.</b>
 
-Very simple library for mocking the (dropbox ruby gem)[http://rubygems.org/gems/dropbox].
+Very simple library for mocking the dropbox ruby gem[http://rubygems.org/gems/dropbox].
 
 So you can test your application without making real calls to Dropbox API.
 
