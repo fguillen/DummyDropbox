@@ -1,0 +1,8 @@
+Manifest
+README.md
+Rakefile
+lib/dummy_dropbox.rb
+test/dummy_dropbox_test.rb
+test/fixtures/dropbox/file1.txt
+test/fixtures/dropbox/folder1/file2.txt
+test/fixtures/dropbox/folder1/file3.txt
