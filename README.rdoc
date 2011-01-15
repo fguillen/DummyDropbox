@@ -21,7 +21,7 @@ You can test your application without making real calls to Dropbox API using a *
     # Optional:
     # Point where your local folder structure is located.
     # It will be used as if the real Dropbox structure was been reading.
-    DropboxDummy.root_path = <your_local_folder> 
+    DummyDropbox.root_path = <your_local_folder> 
     
     session = Dropbox::Session.new('key', 'secret')
     assert_equal( File.read( "<your_local_folder>/file1.txt" ) , @session.download( '/file1.txt' ) )
