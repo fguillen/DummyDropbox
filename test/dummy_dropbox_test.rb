@@ -26,4 +26,24 @@ class DummyDropboxTest < Test::Unit::TestCase
     assert_equal(['/file1.txt', '/folder1'], @session.list('').map{ |e| e.path } )
     assert_equal(['folder1/file2.txt', 'folder1/file3.txt'], @session.list('folder1').map{ |e| e.path } )
   end
+  
+  def test_create_folder
+    FileUtils.rm_r( "#{DummyDropbox.root_path}/tmp_folder" )  if File.exists?( "#{DummyDropbox.root_path}/tmp_folder" )
+    metadata = @session.create_folder '/tmp_folder'
+    assert( File.directory?( "#{DummyDropbox.root_path}/tmp_folder" ) )
+    assert( metadata.directory? )
+    
+    FileUtils.rm_r( "#{DummyDropbox.root_path}/tmp_folder" )
+  end
+  
+  def test_upload
+    FileUtils.rm_r( "#{DummyDropbox.root_path}/file.txt" )  if File.exists?( "#{DummyDropbox.root_path}/file.txt" )
+    metadata = @session.upload( "#{File.dirname(__FILE__)}/fixtures/file.txt", '/' )
+    assert_equal( 
+      File.read( "#{File.dirname(__FILE__)}/fixtures/file.txt" ),
+      File.read( "#{DummyDropbox.root_path}/file.txt" )
+    )
+    assert( !metadata.directory? )
+    FileUtils.rm_r( "#{DummyDropbox.root_path}/file.txt" )
+  end
 end

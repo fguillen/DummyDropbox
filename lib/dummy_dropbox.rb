@@ -46,6 +46,20 @@ module Dropbox
       File.read( "#{Dropbox.files_root_path}/#{path}" )
     end
     
+    def create_folder(path, options={})
+      FileUtils.mkdir( "#{Dropbox.files_root_path}/#{path}" )
+      
+      return self.metadata( path )
+    end
+    
+    # TODO: the original gem method allow a lot of types for 'local_path' parameter
+    # this dummy version only allows a file_path
+    def upload(local_file_path, remote_folder_path, options={})
+      FileUtils.cp( local_file_path, "#{Dropbox.files_root_path}/#{remote_folder_path}/" )
+      
+      return self.metadata( "#{remote_folder_path}/#{File.basename(local_file_path)}" )
+    end
+    
     def metadata(path, options={})
       response = <<-RESPONSE
         {
