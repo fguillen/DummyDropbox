@@ -1,7 +1,4 @@
-require 'rubygems'
 require 'test/unit'
-require 'ostruct'
-require 'dropbox'
 require "#{File.dirname(__FILE__)}/../lib/dummy_dropbox.rb"
 
 class DummyDropboxTest < Test::Unit::TestCase

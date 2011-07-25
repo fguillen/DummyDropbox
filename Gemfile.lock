@@ -1,0 +1,23 @@
+PATH
+  remote: .
+  specs:
+    dummy_dropbox (0.0.5)
+      dropbox
+
+GEM
+  remote: http://rubygems.org/
+  specs:
+    dropbox (1.3.0)
+      json (>= 1.2.0)
+      multipart-post (>= 1.1.0)
+      oauth (>= 0.3.6)
+    json (1.5.3)
+    multipart-post (1.1.3)
+    oauth (0.4.5)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  bundler (>= 1.0.0.rc.6)
+  dummy_dropbox!

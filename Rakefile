@@ -1,13 +1,15 @@
-require 'rubygems'  
-require 'rake'  
-require 'echoe'  
-  
-Echoe.new('dummy_dropbox', '0.0.2') do |p|  
-  p.description     = "Dummy monkey patching for the dropbox ruby gem: http://rubygems.org/gems/dropbox"  
-  p.url             = "http://github.com/fguillen/DummyDropbox"  
-  p.author          = "Fernando Guillen"
-  p.email           = "fguillen.mail@gmail.com"  
-  p.ignore_pattern  = []
-  p.development_dependencies = []
-  p.runtime_dependencies = ['dropbox']
+# require 'bundler/gem_tasks'
+
+require 'rake'
+require 'rake/testtask'
+require 'bundler'
+
+Bundler::GemHelper.install_tasks
+
+task :default => :test
+
+Rake::TestTask.new do |t|
+  t.libs << '.'
+  t.test_files = FileList['test/*_test.rb']
+  t.verbose = true
 end

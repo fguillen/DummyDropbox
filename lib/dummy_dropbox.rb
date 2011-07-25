@@ -1,4 +1,12 @@
-class DummyDropbox
+begin
+  require 'dropbox'
+rescue LoadError
+  require 'rubygems'
+  require 'dropbox'
+end
+require 'ostruct'
+
+module DummyDropbox
   @@root_path = File.expand_path( "#{File.dirname(__FILE__)}/../test/fixtures/dropbox" )
   
   def self.root_path=(path)
