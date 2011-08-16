@@ -78,7 +78,8 @@ module Dropbox
           "is_dir": #{File.directory?( "#{Dropbox.files_root_path}/#{path}" )},
           "size": "566.0KB",
           "root": "dropbox",
-          "icon": "page_white_acrobat"
+          "icon": "page_white_acrobat",
+          "hash": "theHash"
         }
       RESPONSE
       return parse_metadata(JSON.parse(response).symbolize_keys_recursively).to_struct_recursively
