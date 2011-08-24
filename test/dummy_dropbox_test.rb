@@ -23,6 +23,20 @@ class DummyDropboxTest < Test::Unit::TestCase
     assert_equal(['/file1.txt', '/folder1'], @session.list('').map{ |e| e.path } )
     assert_equal(['folder1/file2.txt', 'folder1/file3.txt'], @session.list('folder1').map{ |e| e.path } )
   end
+
+  def test_delete
+    FileUtils.mkdir_p( "#{DummyDropbox.root_path}/tmp_folder" )
+    3.times { |i| FileUtils.touch( "#{DummyDropbox.root_path}/tmp_folder/#{i}.txt" ) }
+
+    assert( File.exists?( "#{DummyDropbox.root_path}/tmp_folder" ) )    
+    assert( File.exists?( "#{DummyDropbox.root_path}/tmp_folder/0.txt" ) )
+    
+    metadata = @session.delete '/tmp_folder/0.txt'
+    assert( !File.exists?( "#{DummyDropbox.root_path}/tmp_folder/0.txt" ) )
+    
+    metadata = @session.delete '/tmp_folder'
+    assert( !File.exists?( "#{DummyDropbox.root_path}/tmp_folder" ) )
+  end
   
   def test_create_folder
     FileUtils.rm_r( "#{DummyDropbox.root_path}/tmp_folder" )  if File.exists?( "#{DummyDropbox.root_path}/tmp_folder" )

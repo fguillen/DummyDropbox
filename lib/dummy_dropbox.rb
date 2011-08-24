@@ -53,6 +53,12 @@ module Dropbox
     def download(path, options={})
       File.read( "#{Dropbox.files_root_path}/#{path}" )
     end
+
+    def delete(path, options={})
+      FileUtils.rm_rf( "#{Dropbox.files_root_path}/#{path}" )
+      
+      return true
+    end
     
     def create_folder(path, options={})
       FileUtils.mkdir( "#{Dropbox.files_root_path}/#{path}" )
