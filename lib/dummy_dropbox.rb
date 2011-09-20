@@ -75,19 +75,24 @@ module Dropbox
     end
     
     def metadata(path, options={})
+      is_dir = File.directory?( "#{Dropbox.files_root_path}/#{path}" )
+      mime_type = is_dir ? "" : ',"mime_type": "image/jpeg"'
+
       response = <<-RESPONSE
         {
           "thumb_exists": false,
           "bytes": "#{File.size( "#{Dropbox.files_root_path}/#{path}" )}",
           "modified": "Tue, 04 Nov 2008 02:52:28 +0000",
           "path": "#{path}",
-          "is_dir": #{File.directory?( "#{Dropbox.files_root_path}/#{path}" )},
+          "is_dir": "#{is_dir}",
           "size": "566.0KB",
           "root": "dropbox",
           "icon": "page_white_acrobat",
           "hash": "theHash"
+          #{mime_type}
         }
       RESPONSE
+
       return parse_metadata(JSON.parse(response).symbolize_keys_recursively).to_struct_recursively
     end
     
