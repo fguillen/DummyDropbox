@@ -88,7 +88,8 @@ module Dropbox
           "size": "566.0KB",
           "root": "dropbox",
           "icon": "page_white_acrobat",
-          "hash": "theHash"
+          "hash": "theHash",
+          "revision": 3
           #{mime_type}
         }
       RESPONSE
