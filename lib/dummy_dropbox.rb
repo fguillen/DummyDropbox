@@ -84,7 +84,7 @@ module Dropbox
           "bytes": "#{File.size( "#{Dropbox.files_root_path}/#{path}" )}",
           "modified": "Tue, 04 Nov 2008 02:52:28 +0000",
           "path": "#{path}",
-          "is_dir": "#{is_dir}",
+          "is_dir": #{is_dir},
           "size": "566.0KB",
           "root": "dropbox",
           "icon": "page_white_acrobat",
