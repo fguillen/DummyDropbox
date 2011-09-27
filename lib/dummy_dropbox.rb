@@ -59,11 +59,24 @@ module Dropbox
       
       return true
     end
-    
+
     def create_folder(path, options={})
       FileUtils.mkdir( "#{Dropbox.files_root_path}/#{path}" )
       
       return self.metadata( path )
+    end
+
+    def rename(path, new_name, options={})
+      path = path.sub(/\/$/, '')
+      destination = path.split('/')
+      destination[destination.size - 1] = new_name
+      destination = destination.join('/')
+      move path, destination, options
+    end
+
+    def move(source, target, options={})
+      FileUtils.mv("#{Dropbox.files_root_path}/#{source}", "#{Dropbox.files_root_path}/#{target}")
+      return true
     end
     
     # TODO: the original gem method allow a lot of types for 'local_path' parameter
@@ -81,7 +94,7 @@ module Dropbox
       response = <<-RESPONSE
         {
           "thumb_exists": false,
-          "bytes": "#{File.size( "#{Dropbox.files_root_path}/#{path}" )}",
+          "bytes": #{File.size( "#{Dropbox.files_root_path}/#{path}" )},
           "modified": "Tue, 04 Nov 2008 02:52:28 +0000",
           "path": "#{path}",
           "is_dir": #{is_dir},
@@ -102,7 +115,9 @@ module Dropbox
       
       Dir["#{Dropbox.files_root_path}/#{path}/**"].each do |element_path|
         element_path.gsub!( "#{Dropbox.files_root_path}/", '' )
-        
+
+        is_dir = File.directory?( "#{Dropbox.files_root_path}/#{element_path}" )
+
         element = 
           OpenStruct.new(
             :icon => 'folder',
@@ -111,9 +126,9 @@ module Dropbox
             :thumb_exists => false,
             :modified => Time.parse( '2010-01-01 10:10:10' ),
             :revision => 1,
-            :bytes => 0,
-            :is_dir => File.directory?( "#{Dropbox.files_root_path}/#{element_path}" ),
-            :size => '0 bytes'
+            :bytes => (is_dir ? 0 : File.size( "#{Dropbox.files_root_path}/#{element_path}" )),
+            :is_dir => is_dir,
+            :size => '00 bytes'
           )
         
         result << element
