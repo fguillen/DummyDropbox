@@ -20,8 +20,8 @@ class DummyDropboxTest < Test::Unit::TestCase
   end
   
   def test_list
-    assert_equal(['/file1.txt', '/folder1'], @session.list('').map{ |e| e.path } )
-    assert_equal(['folder1/file2.txt', 'folder1/file3.txt'], @session.list('folder1').map{ |e| e.path } )
+    assert_equal(['/file1.txt', '/folder1'].sort, @session.list('').map{ |e| e.path }.sort)
+    assert_equal(['folder1/file2.txt', 'folder1/file3.txt'].sort, @session.list('folder1').map{ |e| e.path }.sort )
   end
 
   def test_delete
