@@ -37,13 +37,37 @@ class DummyDropboxTest < Test::Unit::TestCase
     metadata = @session.delete '/tmp_folder'
     assert( !File.exists?( "#{DummyDropbox.root_path}/tmp_folder" ) )
   end
+
+  def test_rename
+    FileUtils.mkdir_p( "#{DummyDropbox.root_path}/tmp_folder" )
+    assert( File.exists?( "#{DummyDropbox.root_path}/tmp_folder" ) )
+
+    @session.rename '/tmp_folder', 'temp_folder'
+    assert !@session.list('/').detect {|e| e.path == '/tmp_folder'}
+    assert @session.list('/').detect {|e| e.path == '/temp_folder'}
+    
+    FileUtils.rmdir( "#{DummyDropbox.root_path}/temp_folder" )
+  end
+
+  def test_move
+    FileUtils.mkdir_p( "#{DummyDropbox.root_path}/tmp_folder" )
+
+    @session.move 'file1.txt', 'tmp_folder/file1.txt'
+    assert !@session.list('/').detect {|e| e.path == '/file1.txt'}
+    assert @session.list('/tmp_folder').detect {|e| e.path == '/tmp_folder/file1.txt'}
+    
+    @session.move '/tmp_folder/file1.txt', '/file1.txt'
+
+    FileUtils.rmdir( "#{DummyDropbox.root_path}/tmp_folder" )
+  end
   
   def test_create_folder
     FileUtils.rm_r( "#{DummyDropbox.root_path}/tmp_folder" )  if File.exists?( "#{DummyDropbox.root_path}/tmp_folder" )
     metadata = @session.create_folder '/tmp_folder'
     assert( File.directory?( "#{DummyDropbox.root_path}/tmp_folder" ) )
     assert( metadata.directory? )
-    
+    assert( metadata.is_dir )
+    assert_equal metadata.revision, 32
     FileUtils.rm_r( "#{DummyDropbox.root_path}/tmp_folder" )
   end
   
@@ -55,6 +79,9 @@ class DummyDropboxTest < Test::Unit::TestCase
       File.read( "#{DummyDropbox.root_path}/file.txt" )
     )
     assert( !metadata.directory? )
+    assert( !metadata.is_dir )
+    assert_equal metadata.mime_type, 'image/jpeg'
+    assert_equal metadata.revision, 79
     FileUtils.rm_r( "#{DummyDropbox.root_path}/file.txt" )
   end
 end
