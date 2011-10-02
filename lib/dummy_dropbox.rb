@@ -61,8 +61,9 @@ module Dropbox
     end
 
     def create_folder(path, options={})
-      FileUtils.mkdir( "#{Dropbox.files_root_path}/#{path}" )
-      
+      folder_path = "#{Dropbox.files_root_path}/#{path}"
+      raise FileExistsError.new(path) if File.directory?(folder_path)
+      FileUtils.mkdir(folder_path)
       return self.metadata( path )
     end
 
@@ -102,7 +103,7 @@ module Dropbox
           "root": "dropbox",
           "icon": "page_white_acrobat",
           "hash": "theHash",
-          "revision": 3
+          "revision": #{is_dir ? 32 : 79}
           #{mime_type}
         }
       RESPONSE
@@ -114,7 +115,7 @@ module Dropbox
       result = []
       
       Dir["#{Dropbox.files_root_path}/#{path}/**"].each do |element_path|
-        element_path.gsub!( "#{Dropbox.files_root_path}/", '' )
+        element_path.gsub!( "#{Dropbox.files_root_path}/", '' ).gsub!(/^\/+/,'/')
 
         is_dir = File.directory?( "#{Dropbox.files_root_path}/#{element_path}" )
 
@@ -128,7 +129,7 @@ module Dropbox
             :revision => 1,
             :bytes => (is_dir ? 0 : File.size( "#{Dropbox.files_root_path}/#{element_path}" )),
             :is_dir => is_dir,
-            :size => '00 bytes'
+            :size => '0 bytes'
           )
         
         result << element
@@ -158,4 +159,7 @@ module Dropbox
   def self.files_root_path
     return DummyDropbox::root_path
   end
+
+  class FileExistsError < FileError; end
+
 end
