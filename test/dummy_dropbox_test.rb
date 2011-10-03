@@ -12,6 +12,7 @@ class DummyDropboxTest < Test::Unit::TestCase
   
   def test_download
     assert_equal( "File 1", @session.download( '/file1.txt' ) )
+    assert_raise(Dropbox::UnsuccessfulResponseError) {@session.download( '/filex.txt')}
   end
   
   def test_metadata
@@ -33,7 +34,7 @@ class DummyDropboxTest < Test::Unit::TestCase
     
     metadata = @session.delete '/tmp_folder/0.txt'
     assert( !File.exists?( "#{DummyDropbox.root_path}/tmp_folder/0.txt" ) )
-    
+
     metadata = @session.delete '/tmp_folder'
     assert( !File.exists?( "#{DummyDropbox.root_path}/tmp_folder" ) )
   end
@@ -68,6 +69,7 @@ class DummyDropboxTest < Test::Unit::TestCase
     assert( metadata.directory? )
     assert( metadata.is_dir )
     assert_equal metadata.revision, 32
+    assert_raise(Dropbox::FileExistsError) {@session.create_folder('/tmp_folder')}
     FileUtils.rm_r( "#{DummyDropbox.root_path}/tmp_folder" )
   end
   

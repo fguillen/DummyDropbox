@@ -51,6 +51,7 @@ module Dropbox
     #################
     
     def download(path, options={})
+      raise UnsuccessfulResponseError.new(path, Net::HTTPNotFound) unless File.exists?("#{Dropbox.files_root_path}/#{path}")
       File.read( "#{Dropbox.files_root_path}/#{path}" )
     end
 
@@ -160,6 +161,29 @@ module Dropbox
     return DummyDropbox::root_path
   end
 
+  class APIError < StandardError
+    # The request URL.
+    attr_reader :request
+    # The Net::HTTPResponse returned by the server.
+    attr_reader :response
+
+    def initialize(request, response) # :nodoc:
+      @request = request
+      @response = response
+    end
+
+    def to_s # :nodoc:
+      "API error: #{request}"
+    end
+  end
+
+  class UnsuccessfulResponseError < APIError
+    def to_s
+      "HTTP status #{@response.class.to_s} received: #{request}"
+    end
+  end
+
   class FileExistsError < FileError; end
+  class FileNotFoundError < FileError; end
 
 end
