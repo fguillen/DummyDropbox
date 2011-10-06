@@ -56,5 +56,9 @@ class DummyDropboxTest < Test::Unit::TestCase
     )
     assert( !metadata.directory? )
     FileUtils.rm_r( "#{DummyDropbox.root_path}/file.txt" )
+    
+    metadata = @session.upload( StringIO.new("stuff"), '/', :as => "stringio.txt")
+    assert( File.exists?( "#{DummyDropbox.root_path}/#{metadata.path}" ) )
+    FileUtils.rm_r( "#{DummyDropbox.root_path}/stringio.txt" ) if File.exists?( "#{DummyDropbox.root_path}/stringio.txt" )
   end
 end
