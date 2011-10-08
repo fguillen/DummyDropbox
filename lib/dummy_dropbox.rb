@@ -51,6 +51,7 @@ module Dropbox
     #################
     
     def download(path, options={})
+      raise UnsuccessfulResponseError.new(path, Net::HTTPNotFound) unless File.exists?("#{Dropbox.files_root_path}/#{path}")
       File.read( "#{Dropbox.files_root_path}/#{path}" )
     end
 
@@ -59,11 +60,25 @@ module Dropbox
       
       return true
     end
-    
+
     def create_folder(path, options={})
-      FileUtils.mkdir( "#{Dropbox.files_root_path}/#{path}" )
-      
+      folder_path = "#{Dropbox.files_root_path}/#{path}"
+      raise FileExistsError.new(path) if File.directory?(folder_path)
+      FileUtils.mkdir(folder_path)
       return self.metadata( path )
+    end
+
+    def rename(path, new_name, options={})
+      path = path.sub(/\/$/, '')
+      destination = path.split('/')
+      destination[destination.size - 1] = new_name
+      destination = destination.join('/')
+      move path, destination, options
+    end
+
+    def move(source, target, options={})
+      FileUtils.mv("#{Dropbox.files_root_path}/#{source}", "#{Dropbox.files_root_path}/#{target}")
+      return true
     end
     
     # TODO: the original gem method allow a lot of types for 'local_path' parameter
@@ -85,19 +100,25 @@ module Dropbox
     end
     
     def metadata(path, options={})
+      is_dir = File.directory?( "#{Dropbox.files_root_path}/#{path}" )
+      mime_type = is_dir ? "" : ',"mime_type": "image/jpeg"'
+
       response = <<-RESPONSE
         {
           "thumb_exists": false,
-          "bytes": "#{File.size( "#{Dropbox.files_root_path}/#{path}" )}",
+          "bytes": #{File.size( "#{Dropbox.files_root_path}/#{path}" )},
           "modified": "Tue, 04 Nov 2008 02:52:28 +0000",
           "path": "#{path}",
-          "is_dir": #{File.directory?( "#{Dropbox.files_root_path}/#{path}" )},
+          "is_dir": #{is_dir},
           "size": "566.0KB",
           "root": "dropbox",
           "icon": "page_white_acrobat",
-          "hash": "theHash"
+          "hash": "theHash",
+          "revision": #{is_dir ? 32 : 79}
+          #{mime_type}
         }
       RESPONSE
+
       return parse_metadata(JSON.parse(response).symbolize_keys_recursively).to_struct_recursively
     end
     
@@ -105,8 +126,10 @@ module Dropbox
       result = []
       
       Dir["#{Dropbox.files_root_path}/#{path}/**"].each do |element_path|
-        element_path.gsub!( "#{Dropbox.files_root_path}/", '' )
-        
+        element_path.gsub!( "#{Dropbox.files_root_path}/", '' ).gsub!(/^\/+/,'/')
+
+        is_dir = File.directory?( "#{Dropbox.files_root_path}/#{element_path}" )
+
         element = 
           OpenStruct.new(
             :icon => 'folder',
@@ -115,8 +138,8 @@ module Dropbox
             :thumb_exists => false,
             :modified => Time.parse( '2010-01-01 10:10:10' ),
             :revision => 1,
-            :bytes => 0,
-            :is_dir => File.directory?( "#{Dropbox.files_root_path}/#{element_path}" ),
+            :bytes => (is_dir ? 0 : File.size( "#{Dropbox.files_root_path}/#{element_path}" )),
+            :is_dir => is_dir,
             :size => '0 bytes'
           )
         
@@ -148,4 +171,30 @@ module Dropbox
   def self.files_root_path
     return DummyDropbox::root_path
   end
+
+  class APIError < StandardError
+    # The request URL.
+    attr_reader :request
+    # The Net::HTTPResponse returned by the server.
+    attr_reader :response
+
+    def initialize(request, response) # :nodoc:
+      @request = request
+      @response = response
+    end
+
+    def to_s # :nodoc:
+      "API error: #{request}"
+    end
+  end
+
+  class UnsuccessfulResponseError < APIError
+    def to_s
+      "HTTP status #{@response.class.to_s} received: #{request}"
+    end
+  end
+
+  class FileExistsError < FileError; end
+  class FileNotFoundError < FileError; end
+
 end
