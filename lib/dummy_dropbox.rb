@@ -27,7 +27,7 @@ module Dropbox
     end
     
     def authorize_url(*args)
-      return 'dummy url'
+      return 'https://www.dropbox.com/0/oauth/authorize'
     end
     
     def authorize(options={})
@@ -69,9 +69,19 @@ module Dropbox
     # TODO: the original gem method allow a lot of types for 'local_path' parameter
     # this dummy version only allows a file_path
     def upload(local_file_path, remote_folder_path, options={})
-      FileUtils.cp( local_file_path, "#{Dropbox.files_root_path}/#{remote_folder_path}/" )
+      if(local_file_path.kind_of? StringIO)
+        local_file = Tempfile.new("#{Dropbox.files_root_path}/../#{Time.now.to_i}") do |f|
+          f.write local_file_path.to_s
+        end
+        local_file_path = local_file.path
+        FileUtils.cp( local_file_path, "#{Dropbox.files_root_path}/#{remote_folder_path}/#{options[:as]}" )
+        outfile = "#{remote_folder_path}/#{options[:as]}"
+      else
+        FileUtils.cp( local_file_path, "#{Dropbox.files_root_path}/#{remote_folder_path}/" )
+        outfile = "#{remote_folder_path}/#{File.basename(local_file_path)}"
+      end
       
-      return self.metadata( "#{remote_folder_path}/#{File.basename(local_file_path)}" )
+      return self.metadata( outfile )
     end
     
     def metadata(path, options={})
@@ -121,6 +131,7 @@ module Dropbox
       {
           "country": "",
           "display_name": "John Q. User",
+          "email": "john@user.com",
           "quota_info": {
               "shared": 37378890,
               "quota": 62277025792,
