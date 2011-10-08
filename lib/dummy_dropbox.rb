@@ -70,7 +70,7 @@ module Dropbox
     # this dummy version only allows a file_path
     def upload(local_file_path, remote_folder_path, options={})
       if(local_file_path.kind_of? StringIO)
-        local_file = Tempfile.new("#{Dropbox.files_root_path}/../#{Time.now.to_i}") do |f|
+        local_file = Tempfile.new("dummy_dropbox_#{Time.now.to_i}") do |f|
           f.write local_file_path.to_s
         end
         local_file_path = local_file.path
