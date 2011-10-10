@@ -77,6 +77,9 @@ module Dropbox
     end
 
     def move(source, target, options={})
+      source = source.sub(/^\//, '')
+      target = target.sub(/^\//, '')
+      target << File.basename(source) if target.ends_with?('/')
       FileUtils.mv("#{Dropbox.files_root_path}/#{source}", "#{Dropbox.files_root_path}/#{target}")
       return true
     end
@@ -85,7 +88,6 @@ module Dropbox
     # this dummy version only allows a file_path
     def upload(local_file_path, remote_folder_path, options={})
       FileUtils.cp( local_file_path, "#{Dropbox.files_root_path}/#{remote_folder_path}/" )
-      
       return self.metadata( "#{remote_folder_path}/#{File.basename(local_file_path)}" )
     end
     
